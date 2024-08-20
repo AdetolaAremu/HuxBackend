@@ -28,6 +28,6 @@ const contactSchema = new mongoose.Schema<IContact>(
   }
 );
 
-const User: Model<IContact> = mongoose.model("Contacts", contactSchema);
+const Contact: Model<IContact> = mongoose.model("Contact", contactSchema);
 
-module.exports = User;
+module.exports = Contact;
