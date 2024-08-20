@@ -34,9 +34,10 @@ const userSchema = new mongoose.Schema<IUserDocument>(
       type: String,
       required: [true, "Confirm password is required"],
       validate: {
-        validator: function (this: any, el: String): boolean {
+        validator: function (this: IUserDocument, el: string): boolean {
           return el === this.password;
         },
+        message: "Passwords do not match",
       },
     },
   },
@@ -48,9 +49,17 @@ const userSchema = new mongoose.Schema<IUserDocument>(
 userSchema.pre<IUserDocument>("save", async function (next) {
   if (!this.isModified("password")) return next();
 
-  this.password = await bcrypt.hash(this.password);
+  if (!this.password) {
+    return next(new Error("Password is undefined"));
+  }
+
+  // console.log("Password before hashing:", this.password);
+
+  this.password = await bcrypt.hash(this.password, 12);
+  // console.log("Password after hashing:", this.password);
 
   this.confirmPassword = undefined;
+  next();
 });
 
 userSchema.methods.correctPassword = async function (

@@ -11,7 +11,7 @@ process.on("uncaughtException", (err) => {
 
 dotenv.config({ path: "./.env" });
 
-const app = require("./index");
+import app from "./index";
 
 const database = process.env.DATABASE;
 

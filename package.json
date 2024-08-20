@@ -2,7 +2,7 @@
   "name": "hux-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "ts-node index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon --exec npx ts-node server.ts",
@@ -32,6 +32,7 @@
     "express-rate-limit": "^7.4.0",
     "express-validator": "^7.2.0",
     "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.3",
     "nodemon": "^3.1.4",
     "pg": "^8.12.0",

@@ -1,3 +1,4 @@
+import { Request } from "express";
 import { Document } from "mongoose";
 
 export interface IUserDocument extends Document {
@@ -8,4 +9,8 @@ export interface IUserDocument extends Document {
   lastName: String;
   email: String;
   username: String;
+}
+
+export interface CustomRequest extends Request {
+  user?: IUserDocument;
 }

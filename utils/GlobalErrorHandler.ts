@@ -1,44 +1,46 @@
+import { Request, Response, NextFunction } from "express";
+import AppError from "./AppError";
 import { CastError, Error as MongooseError } from "mongoose";
-import { Response, Request, NextFunction } from "express";
+import { MongoServerError } from "mongodb";
 
 interface FieldsError extends Error {
-  keyValue: String;
-  statusCode: number;
-  status: String;
-  isOperational: boolean;
-  code: number;
+  keyValue?: { [key: string]: string };
+  statusCode?: number;
+  status?: string;
+  isOperational?: boolean;
+  code?: number;
+  stack?: string;
 }
-
-const appErrror = require("../utils/AppError");
 
 const handleCastErrorDB = (err: CastError) => {
   const message = `Invalid ${err.path}: ${err.value}`;
-  return new appErrror(message, 400);
+  return new AppError(message, 400);
 };
 
-const handleDuplicateFieldsDB = (err: FieldsError) => {
-  const value = Object.values(err.keyValue);
-  const message = `Duplicate field value: ${value[0]}. Please use another value`;
-  return new appErrror(message, 404);
+const handleDuplicateFieldsDB = (err: MongoServerError) => {
+  const value = err.errorResponse?.keyValue?.email;
+  const message = value
+    ? `Duplicate field value: ${value}. Please use another value.`
+    : "Duplicate field value. Please use another value.";
+
+  return new AppError(message, 404);
 };
 
 const handleValidationErrorDB = (err: MongooseError.ValidationError) => {
   const errors = Object.values(err.errors).map((el) => el.message);
   const message = `Invalid input data: ${errors.join(". ")}`;
-  return new appErrror(message, 422);
+  return new AppError(message, 422);
 };
 
 const handleJWTError = () =>
-  new appErrror("Invalid token. Please login again!", 401);
-
+  new AppError("Invalid token. Please login again!", 401);
 const handleJWTExpiredError = () =>
-  new appErrror("Your token has been expired! Please login again", 401);
+  new AppError("Your token has expired! Please login again", 401);
 
 const sendErrorDev = (err: FieldsError, req: Request, res: Response) => {
-  // A) API
   if (req.url.startsWith("/api")) {
-    return res.status(err.statusCode).json({
-      status: err.status,
+    return res.status(err.statusCode || 500).json({
+      status: err.status || "error",
       error: err,
       message: err.message,
       stack: err.stack,
@@ -47,27 +49,25 @@ const sendErrorDev = (err: FieldsError, req: Request, res: Response) => {
 };
 
 const sendErrorProd = (err: FieldsError, req: Request, res: Response) => {
-  // A) APIs
   if (req.url.startsWith("/api")) {
     if (err.isOperational) {
-      return res.status(err.statusCode).json({
-        status: err.status,
+      return res.status(err.statusCode || 500).json({
+        status: err.status || "error",
         message: err.message,
       });
     }
-    // 1) Log error
-    console.log("ERROR 💥", err);
 
-    // 2) Send generic message
+    console.error("ERROR 💥", err);
+
     return res.status(500).json({
       status: "error",
-      message: "Something went very wrong",
+      message: "Something went very wrong!",
     });
   }
 };
 
 // GLOBAL ERROR HANDLING MIDLEWARE
-module.exports = (
+const globalErrorHandler = (
   err: FieldsError,
   req: Request,
   res: Response,
@@ -79,17 +79,24 @@ module.exports = (
   if (process.env.NODE_ENV === "development") {
     sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === "production") {
-    let error = { ...err };
-    error.message = err.message;
-    error.name = err.name;
-    if (error instanceof MongooseError.CastError)
+    let error = { ...err, message: err.message, name: err.name };
+
+    if (error instanceof MongooseError.CastError) {
       error = handleCastErrorDB(error as MongooseError.CastError);
-    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (error instanceof MongooseError.ValidationError)
+    } else if (error instanceof MongoServerError && error.code === 11000) {
+      error = handleDuplicateFieldsDB(error as MongoServerError);
+    } else if (error instanceof MongooseError.ValidationError) {
       error = handleValidationErrorDB(error as MongooseError.ValidationError);
-    if (error.name === "JsonWebTokenError") error = handleJWTError();
-    if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
+    } else if (error.name === "JsonWebTokenError") {
+      error = handleJWTError();
+    } else if (error.name === "TokenExpiredError") {
+      error = handleJWTExpiredError();
+    } else {
+      error = new AppError("Something went very wrong!", 500);
+    }
 
     sendErrorProd(error, req, res);
   }
 };
+
+export default globalErrorHandler;
