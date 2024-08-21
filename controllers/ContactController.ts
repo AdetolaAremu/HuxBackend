@@ -7,17 +7,28 @@ import { filterObj } from "../utils/Helper";
 const Contact = require("../models/Contact.model");
 
 export const createContact = catchAsync(async (req: Request, res: Response) => {
-  const { firstName, lastName, phoneNumber, email } = req.body;
+  const {
+    firstName,
+    lastName,
+    phoneNumber,
+    email,
+    contactType,
+    country,
+    location,
+  } = req.body;
 
   const contact: IContact = await Contact.create({
     firstName: firstName,
     lastName: lastName,
     phoneNumber: phoneNumber,
     email: email,
+    contactType: contactType,
+    country: country,
+    location: location,
   });
 
   res.status(201).json({
-    status: "success",
+    status: true,
     message: "Contact created successfully",
     contact,
   });
@@ -25,13 +36,16 @@ export const createContact = catchAsync(async (req: Request, res: Response) => {
 
 export const getAllContacts = catchAsync(
   async (req: Request, res: Response) => {
-    const contacts = new APIFeatures(Contact.find(), req.query)
+    const contactsQuery = new APIFeatures(Contact.find(), req.query)
       .sort()
       .fields()
       .filter()
       .paginate();
 
-    res.json({
+    const contacts = await contactsQuery.query;
+
+    res.status(200).json({
+      status: true,
       message: "Contacts retrieved successfully",
       data: {
         contacts,
@@ -49,6 +63,7 @@ export const getOneContact = catchAsync(
     }
 
     res.json({
+      status: true,
       message: "Contact retrieved successfully",
       data: {
         contact,
@@ -73,16 +88,20 @@ export const updateContact = catchAsync(
       "email"
     );
 
-    await Contact.findByIdAndUpdate(contact.id, filterObjects, {
-      new: true,
-      runValidators: true,
-    });
+    const newContact = await Contact.findByIdAndUpdate(
+      contact.id,
+      filterObjects,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     res.json({
-      status: "success",
+      status: true,
       message: "Contact updated successfully",
       data: {
-        contact,
+        newContact,
       },
     });
   }
@@ -97,6 +116,7 @@ export const deleteContact = catchAsync(
     }
 
     res.status(200).json({
+      status: true,
       message: "Contact deleted successfully",
     });
   }

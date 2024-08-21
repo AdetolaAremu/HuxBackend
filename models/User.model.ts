@@ -19,11 +19,6 @@ const userSchema = new mongoose.Schema<IUserDocument>(
       required: [true, "Email is required"],
       validate: [validator.isEmail, "Please provide a valid email address"],
     },
-    username: {
-      type: String,
-      unique: true,
-      required: [true, "Username is required"],
-    },
     password: {
       type: String,
       required: [true, "Password is required"],

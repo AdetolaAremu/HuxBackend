@@ -8,7 +8,6 @@ export interface IUserDocument extends Document {
   firstName: String;
   lastName: String;
   email: String;
-  username: String;
 }
 
 export interface CustomRequest extends Request {

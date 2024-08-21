@@ -9,7 +9,7 @@ const User = require("../models/User.model");
 
 const jwtSignedToken = (id: string) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.EXPIRES_IN,
+    expiresIn: "2h", // move this to env
   });
 };
 
@@ -55,14 +55,27 @@ export const loginUser = catchAsync(
       ? Number(process.env.JWT_COOKIE_EXPIRES_IN)
       : 1;
 
-    const expiresIn = new Date(Date.now() + jwtExpiresIn * 24 * 60 * 60 * 1000);
+    const cookieOptions = {
+      expires: new Date(Date.now() + jwtExpiresIn * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secured: true,
+    };
 
-    res.json({
-      status: "success",
-      message: "Login successul",
+    res.cookie("jwt", token, cookieOptions);
+
+    res.status(200).json({
+      message: "Login successful",
       token,
-      expiresIn,
     });
+
+    // const expiresIn = new Date(Date.now() + jwtExpiresIn * 24 * 60 * 60 * 1000);
+
+    // res.json({
+    //   status: "success",
+    //   message: "Login successul",
+    //   token,
+    //   expiresIn,
+    // });
   }
 );
 
@@ -82,10 +95,10 @@ export const logoutUser = catchAsync(async (req: Request, res: Response) => {
 export const privateRoute = catchAsync(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     let token;
-
     if (req.headers.authorization) {
       token = req.headers.authorization.split(" ")[1];
     }
+    console.log(req.headers.authorization, "yooooo");
 
     if (!token) {
       return next(new AppError("You are not authorized", 401));

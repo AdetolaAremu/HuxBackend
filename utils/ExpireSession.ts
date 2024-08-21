@@ -8,6 +8,7 @@ export const expireToken = (token: string, res: Response) => {
 
     if (typeof payload === "object" && payload !== null) {
       delete payload.exp;
+
       jwt.sign({ ...payload }, process.env.JWT_SECRET as string, {
         expiresIn: "1ms",
       });
