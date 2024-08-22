@@ -7,9 +7,10 @@ import AppError from "../utils/AppError";
 import { expireToken } from "../utils/ExpireSession";
 const User = require("../models/User.model");
 
+// sign jwt token and give it an expiry time
 const jwtSignedToken = (id: string) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "2h", // move this to env
+    expiresIn: process.env.EXPIRES_IN,
   });
 };
 
@@ -46,6 +47,7 @@ export const loginUser = catchAsync(
       }
     }
 
+    // Compare bcrypt passwords
     if (!(await user.correctPassword(password, user.password))) {
       return next(new AppError("Email and Password do not match", 400));
     }
@@ -72,6 +74,7 @@ export const logoutUser = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
+// this is what will validate our access to private route
 export const privateRoute = catchAsync(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     let token;

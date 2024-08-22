@@ -36,6 +36,7 @@ export const createContact = catchAsync(async (req: Request, res: Response) => {
 
 export const getAllContacts = catchAsync(
   async (req: Request, res: Response) => {
+    // API feature is a class that helps to format our get in bulk endpoint
     const contactsQuery = new APIFeatures(Contact.find(), req.query)
       .sort()
       .fields()

@@ -12,11 +12,13 @@ interface FieldsError extends Error {
   stack?: string;
 }
 
+// handle mongodb cast error
 const handleCastErrorDB = (err: CastError) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
 };
 
+// handle duplicate value in the database
 const handleDuplicateFieldsDB = (err: MongoServerError) => {
   const value = err.errorResponse?.keyValue?.email;
   const message = value
@@ -26,17 +28,20 @@ const handleDuplicateFieldsDB = (err: MongoServerError) => {
   return new AppError(message, 404);
 };
 
+// to handle validations
 const handleValidationErrorDB = (err: MongooseError.ValidationError) => {
   const errors = Object.values(err.errors).map((el) => el.message);
   const message = `Invalid input data: ${errors.join(". ")}`;
   return new AppError(message, 422);
 };
 
+// hanle jwt error
 const handleJWTError = () =>
   new AppError("Invalid token. Please login again!", 401);
 const handleJWTExpiredError = () =>
   new AppError("Your token has expired! Please login again", 401);
 
+// structure development environment error
 const sendErrorDev = (err: FieldsError, req: Request, res: Response) => {
   if (req.url.startsWith("/api")) {
     return res.status(err.statusCode || 500).json({
@@ -48,6 +53,7 @@ const sendErrorDev = (err: FieldsError, req: Request, res: Response) => {
   }
 };
 
+// structure production error
 const sendErrorProd = (err: FieldsError, req: Request, res: Response) => {
   if (req.url.startsWith("/api")) {
     if (err.isOperational) {

@@ -1,3 +1,4 @@
+// for update, we need to include only the fields we need to update.
 export const filterObj = <T extends object, K extends keyof T>(
   obj: T,
   ...allowedFields: K[]

@@ -48,7 +48,7 @@ const contactSchema = new mongoose.Schema<IContact>(
       type: String,
       unique: true,
       required: false,
-      validate: [validator.isEmail, "Please provide a valid email address"],
+      validate: [validator.isEmail, "Please provide a valid email address"], // extra validator to check email
     },
   },
   {

@@ -2,6 +2,7 @@ import { Response } from "express";
 
 const jwt = require("jsonwebtoken");
 
+// expire jwt token
 export const expireToken = (token: string, res: Response) => {
   try {
     const payload = jwt.decode(token);

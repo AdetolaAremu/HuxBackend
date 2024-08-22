@@ -1,3 +1,4 @@
+// we are extending the Error class and inheriting its methods
 class AppError extends Error {
   public status: string;
   public isOperational: boolean;
