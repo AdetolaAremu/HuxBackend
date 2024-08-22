@@ -7,17 +7,17 @@ import {
   updateContact,
 } from "../controllers/ContactController";
 import { privateRoute } from "../controllers/AuthController";
+
 const router = express.Router();
 
-router.get("/", getAllContacts);
+router.get("/", privateRoute, getAllContacts);
 
-router.use(privateRoute); // authorized routes
+router.post("/", privateRoute, createContact);
 
-router.post("/", createContact);
 router
   .route("/:id")
-  .get(getOneContact)
-  .patch(updateContact)
-  .delete(deleteContact);
+  .get(privateRoute, getOneContact)
+  .patch(privateRoute, updateContact)
+  .delete(privateRoute, deleteContact);
 
 export default router;

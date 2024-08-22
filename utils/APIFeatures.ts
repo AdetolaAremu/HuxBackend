@@ -1,28 +1,27 @@
-class APIFeatures {
-  public query: any;
-  public queryString: any;
+import { Query } from "mongoose";
 
-  constructor(query: string | number, queryString: string | object) {
+class APIFeatures<T> {
+  public query: Query<T[], T>;
+  public queryString: Record<string, any>;
+
+  constructor(query: Query<T[], T>, queryString: Record<string, any>) {
     this.query = query;
     this.queryString = queryString;
   }
 
   filter() {
-    if (typeof this.queryString !== "object" || this.queryString === null) {
-      throw new Error("queryString must be an object");
-    }
-
-    const queryStr: Record<string, any> = { ...this.queryString };
+    const queryStr = { ...this.queryString };
     const excluded = ["sort", "limit", "fields", "page"];
     excluded.forEach((el) => delete queryStr[el]);
 
-    let stringifyObjs = JSON.stringify(queryStr);
-    stringifyObjs = stringifyObjs.replace(
+    // Advanced filtering
+    let filterString = JSON.stringify(queryStr);
+    filterString = filterString.replace(
       /\b(gt|gte|lt|lte)\b/g,
       (match) => `$${match}`
     );
 
-    this.query = this.query.find(JSON.parse(stringifyObjs));
+    this.query = this.query.find(JSON.parse(filterString));
 
     return this;
   }
@@ -51,7 +50,7 @@ class APIFeatures {
 
   paginate() {
     const page = parseInt(this.queryString.page, 10) || 1;
-    const limit = parseInt(this.queryString.limit, 20) || 10;
+    const limit = parseInt(this.queryString.limit, 10) || 10;
     const skip = (page - 1) * limit;
 
     this.query = this.query.skip(skip).limit(limit);

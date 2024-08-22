@@ -10,7 +10,7 @@ import userRouter from "./routes/User.route";
 import AppError from "./utils/AppError";
 import globalErrorHandler from "./utils/GlobalErrorHandler";
 
-const app: Application = express();
+let app = express();
 app.use(cors({ credentials: true, origin: true }));
 app.use(helmet());
 
@@ -50,4 +50,4 @@ app.use("*", (req, res, next) => {
 // Global error handler for every request
 app.use(globalErrorHandler);
 
-export default app; // Exporting the app as default
+export default app;

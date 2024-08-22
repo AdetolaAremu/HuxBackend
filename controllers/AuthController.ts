@@ -51,31 +51,11 @@ export const loginUser = catchAsync(
     }
     const token = jwtSignedToken(user.id);
 
-    const jwtExpiresIn = process.env.JWT_COOKIE_EXPIRES_IN
-      ? Number(process.env.JWT_COOKIE_EXPIRES_IN)
-      : 1;
-
-    const cookieOptions = {
-      expires: new Date(Date.now() + jwtExpiresIn * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-      secured: true,
-    };
-
-    res.cookie("jwt", token, cookieOptions);
-
     res.status(200).json({
       message: "Login successful",
+
       token,
     });
-
-    // const expiresIn = new Date(Date.now() + jwtExpiresIn * 24 * 60 * 60 * 1000);
-
-    // res.json({
-    //   status: "success",
-    //   message: "Login successul",
-    //   token,
-    //   expiresIn,
-    // });
   }
 );
 
@@ -98,7 +78,6 @@ export const privateRoute = catchAsync(
     if (req.headers.authorization) {
       token = req.headers.authorization.split(" ")[1];
     }
-    console.log(req.headers.authorization, "yooooo");
 
     if (!token) {
       return next(new AppError("You are not authorized", 401));
