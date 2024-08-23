@@ -6,13 +6,13 @@ To clone this application, just make use of
 git clone https://github.com/AdetolaAremu/HuxBackend.git
 ```
 
-## 1. To run the application you need to run
+## 1. We need to install some NPM packages first
 
 ```js
 npm install
 ```
 
-This will install the packages and type dependencies i.e
+This will install the packages such as
 
 ```js
 bcryptjs;
