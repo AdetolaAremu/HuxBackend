@@ -12,7 +12,6 @@ const contactSchema = new mongoose.Schema<IContact>(
     },
     middleName: {
       type: String,
-      minlength: 3,
       maxlength: 150,
     },
     lastName: {

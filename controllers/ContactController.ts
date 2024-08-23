@@ -10,6 +10,7 @@ export const createContact = catchAsync(async (req: Request, res: Response) => {
   const {
     firstName,
     lastName,
+    middleName,
     phoneNumber,
     email,
     contactType,
@@ -25,6 +26,7 @@ export const createContact = catchAsync(async (req: Request, res: Response) => {
     contactType: contactType,
     country: country,
     location: location,
+    middleName: middleName,
   });
 
   res.status(201).json({
@@ -76,7 +78,7 @@ export const getOneContact = catchAsync(
 export const updateContact = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const contact = await Contact.findById(req.params.id);
-
+    console.log(contact, "contact");
     if (!contact) {
       return next(new AppError("Contact not found", 404));
     }
@@ -85,9 +87,14 @@ export const updateContact = catchAsync(
       req.body,
       "firstName",
       "lastName",
+      "middleName",
       "phoneNumer",
-      "email"
+      "email",
+      "country",
+      "contactType",
+      "location"
     );
+    console.log(filterObjects);
 
     const newContact = await Contact.findByIdAndUpdate(
       contact.id,
